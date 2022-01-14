@@ -25,20 +25,51 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     const { range } = options;
     const from = range!.from.valueOf();
     const to = range!.to.valueOf();
+    const requestUrl = this.proxyUrl + '/expenses/query';
 
     // Return a constant for each query.
-    const data = options.targets.map((target) => {
+    const promises = options.targets.map((target) => {
       const query = defaults(target, defaultQuery);
-      return new MutableDataFrame({
-        refId: query.refId,
-        fields: [
-          { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
-        ],
+      const promise = getBackendSrv().datasourceRequest({
+        url: requestUrl,
+        method: 'POST',
+        data: {
+          filter: {
+            and: [
+              { property: 'Date', date: { on_or_after: new Date(from).toISOString() } },
+              { property: 'Date', date: { on_or_before: new Date(to).toISOString() } },
+            ],
+          },
+          sorts: [
+            {
+              property: 'Date',
+              direction: 'descending',
+            },
+          ],
+        },
+      });
+      return promise.then((response) => {
+        if (response.status !== 200) {
+          throw new Error('Failed to retrieve expenses from Notion');
+        }
+        const expenses = response.data.results.map((page: any) => ({
+          id: page.id,
+          name: page.properties.Name.title[0].text.content,
+          amount: page.properties.Amount.number,
+          date: new Date(page.properties.Date.date.start).getTime(),
+          tags: page.properties.Category.multi_select.map((t: any) => t.name),
+        }));
+        return new MutableDataFrame({
+          refId: query.refId,
+          fields: [
+            { name: 'Date', type: FieldType.time, values: expenses.map((e: any) => e.date) },
+            { name: 'Amount', type: FieldType.number, values: expenses.map((e: any) => e.amount) },
+          ],
+        });
       });
     });
 
-    return { data };
+    return { data: await Promise.all(promises) };
   }
 
   async testDatasource() {

@@ -22,3 +22,36 @@ export interface MyDataSourceOptions extends DataSourceJsonData {
 export interface MySecureJsonData {
   notionApiKey: string;
 }
+
+export interface Page {
+  id: string;
+  properties: {
+    Name: {
+      title: Array<{
+        text: {
+          content: string;
+        };
+      }>;
+    };
+    Amount: {
+      number: number;
+    };
+    Date: {
+      date: {
+        start: string;
+      };
+    };
+    Category: {
+      multi_select: Array<{
+        name: string;
+      }>;
+    };
+  };
+}
+
+export interface Expense {
+  name: string;
+  amount: number;
+  date: Date;
+  tags: string[];
+}

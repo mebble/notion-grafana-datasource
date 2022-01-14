@@ -10,7 +10,7 @@ import {
 } from '@grafana/data';
 import { getBackendSrv } from '@grafana/runtime';
 
-import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import { MyQuery, MyDataSourceOptions, defaultQuery, Page, Expense } from './types';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   proxyUrl?: string;
@@ -52,18 +52,20 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         if (response.status !== 200) {
           throw new Error('Failed to retrieve expenses from Notion');
         }
-        const expenses = response.data.results.map((page: any) => ({
-          id: page.id,
+        const pages = response.data.results as Page[];
+        const expenses: Expense[] = pages.map((page) => ({
           name: page.properties.Name.title[0].text.content,
           amount: page.properties.Amount.number,
-          date: new Date(page.properties.Date.date.start).getTime(),
-          tags: page.properties.Category.multi_select.map((t: any) => t.name),
+          date: new Date(page.properties.Date.date.start),
+          tags: page.properties.Category.multi_select.map((t) => t.name),
         }));
         return new MutableDataFrame({
           refId: query.refId,
           fields: [
-            { name: 'Date', type: FieldType.time, values: expenses.map((e: any) => e.date) },
-            { name: 'Amount', type: FieldType.number, values: expenses.map((e: any) => e.amount) },
+            { name: 'Date', type: FieldType.time, values: expenses.map((e) => e.date.getTime()) },
+            { name: 'Name', type: FieldType.string, values: expenses.map((e) => e.name) },
+            { name: 'Amount', type: FieldType.number, values: expenses.map((e) => e.amount) },
+            { name: 'Tags', type: FieldType.other, values: expenses.map((e) => e.tags) },
           ],
         });
       });

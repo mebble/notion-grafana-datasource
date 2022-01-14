@@ -8,12 +8,17 @@ import {
   MutableDataFrame,
   FieldType,
 } from '@grafana/data';
+import { getBackendSrv } from '@grafana/runtime';
 
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
+  proxyUrl?: string;
+
   constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>) {
     super(instanceSettings);
+
+    this.proxyUrl = instanceSettings.url;
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
@@ -38,9 +43,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   async testDatasource() {
     // Implement a health check for your data source.
-    return {
-      status: 'success',
-      message: 'Success',
-    };
+    const requestUrl = this.proxyUrl + '/expenses';
+    const response = await getBackendSrv().datasourceRequest({
+      url: requestUrl,
+      method: 'GET',
+    });
+    return response.status === 200
+      ? { status: 'success', message: 'Your Notion DB is reachable!' }
+      : { status: 'failure', message: 'We cannot reach your Notion DB' };
   }
 }

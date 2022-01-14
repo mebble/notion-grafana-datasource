@@ -36,5 +36,16 @@
   "dependencies": {
     "grafanaDependency": ">=7.0.0",
     "plugins": []
-  }
+  },
+  "routes": [
+    {
+      "path": "expenses",
+      "url": "https://api.notion.com/v1/databases/{{ .JsonData.notionDbId }}",
+      "headers": [
+        { "name": "Authorization", "content": "Bearer {{ .SecureJsonData.notionApiKey }}" },
+        { "name": "Content-Type", "content": "application/json" },
+        { "name": "Notion-Version", "content": "2021-05-13" }
+      ]
+    }
+  ]
 }

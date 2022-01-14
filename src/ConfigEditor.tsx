@@ -10,11 +10,11 @@ interface Props extends DataSourcePluginOptionsEditorProps<MyDataSourceOptions> 
 interface State {}
 
 export class ConfigEditor extends PureComponent<Props, State> {
-  onPathChange = (event: ChangeEvent<HTMLInputElement>) => {
+  onDbChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onOptionsChange, options } = this.props;
     const jsonData = {
       ...options.jsonData,
-      path: event.target.value,
+      notionDbId: event.target.value,
     };
     onOptionsChange({ ...options, jsonData });
   };
@@ -25,7 +25,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
     onOptionsChange({
       ...options,
       secureJsonData: {
-        apiKey: event.target.value,
+        notionApiKey: event.target.value,
       },
     });
   };
@@ -36,11 +36,11 @@ export class ConfigEditor extends PureComponent<Props, State> {
       ...options,
       secureJsonFields: {
         ...options.secureJsonFields,
-        apiKey: false,
+        notionApiKey: false,
       },
       secureJsonData: {
         ...options.secureJsonData,
-        apiKey: '',
+        notionApiKey: '',
       },
     });
   };
@@ -54,22 +54,22 @@ export class ConfigEditor extends PureComponent<Props, State> {
       <div className="gf-form-group">
         <div className="gf-form">
           <FormField
-            label="Path"
+            label="Database ID"
             labelWidth={6}
             inputWidth={20}
-            onChange={this.onPathChange}
-            value={jsonData.path || ''}
-            placeholder="json field returned to frontend"
+            onChange={this.onDbChange}
+            value={jsonData.notionDbId}
+            placeholder="Your Notion database ID"
           />
         </div>
 
         <div className="gf-form-inline">
           <div className="gf-form">
             <SecretFormField
-              isConfigured={(secureJsonFields && secureJsonFields.apiKey) as boolean}
-              value={secureJsonData.apiKey || ''}
+              isConfigured={(secureJsonFields && secureJsonFields.notionApiKey) as boolean}
+              value={secureJsonData.notionApiKey}
               label="API Key"
-              placeholder="secure json field (backend only)"
+              placeholder="Your Notion API Key"
               labelWidth={6}
               inputWidth={20}
               onReset={this.onResetAPIKey}

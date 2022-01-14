@@ -43,7 +43,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           sorts: [
             {
               property: 'Date',
-              direction: 'descending',
+              direction: 'ascending',
             },
           ],
         },

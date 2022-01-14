@@ -57,6 +57,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
           name: page.properties.Name.title[0].text.content,
           amount: page.properties.Amount.number,
           date: new Date(page.properties.Date.date.start),
+          month: new Date(page.properties.Date.date.start).getMonth().toString(),
+          dayOfWeek: new Date(page.properties.Date.date.start).getDay().toString(),
           tags: page.properties.Category.multi_select.map((t) => t.name),
         }));
         return new MutableDataFrame({
@@ -65,6 +67,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
             { name: 'Date', type: FieldType.time, values: expenses.map((e) => e.date.getTime()) },
             { name: 'Name', type: FieldType.string, values: expenses.map((e) => e.name) },
             { name: 'Amount', type: FieldType.number, values: expenses.map((e) => e.amount) },
+            { name: 'Month', type: FieldType.string, values: expenses.map((e) => e.month) },
+            { name: 'Day of week', type: FieldType.string, values: expenses.map((e) => e.dayOfWeek) },
             { name: 'Tags', type: FieldType.other, values: expenses.map((e) => e.tags) },
           ],
         });

@@ -54,4 +54,6 @@ export interface Expense {
   amount: number;
   date: Date;
   tags: string[];
+  month: string;
+  dayOfWeek: string;
 }
